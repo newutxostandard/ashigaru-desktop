@@ -109,7 +109,11 @@ public class AshigaruTerminal {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
 
-        Interface.set(Interface.TERMINAL);
+        if(args.terminal) {
+            Interface.set(Interface.TERMINAL);
+        } else {
+            Interface.set(Interface.DESKTOP);
+        }
 
         try {
             if(Interface.get() == Interface.TERMINAL) {
