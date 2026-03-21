@@ -385,7 +385,7 @@ extraJavaModuleInfo {
         requires('org.slf4j')
         requires('com.fasterxml.jackson.databind')
     }
-    module('org.openpnp:openpnp-capture-java', 'openpnp.capture.java') {
+    module('openpnp-capture-java-0.0.30-1.jar', 'openpnp.capture.java', '0.0.30-1') {
         exports('org.openpnp.capture')
         exports('org.openpnp.capture.library')
     }
