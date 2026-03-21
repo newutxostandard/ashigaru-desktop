@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -160,13 +161,17 @@ public class AshigaruMainController implements Initializable {
 
     public void openWalletFile(File file) {
         Storage storage = new Storage(file);
-        if (!storage.isEncrypted()) {
-            Platform.runLater(() -> runLoadService(storage, null));
-        } else {
-            // Password dialog
-            Dialog<String> pwDialog = buildPasswordDialog(storage.getWalletName(null));
-            Optional<String> result = pwDialog.showAndWait();
-            result.ifPresent(pw -> Platform.runLater(() -> runLoadService(storage, new SecureString(pw))));
+        try {
+            if (!storage.isEncrypted()) {
+                Platform.runLater(() -> runLoadService(storage, null));
+            } else {
+                // Password dialog
+                Dialog<String> pwDialog = buildPasswordDialog(storage.getWalletName(null));
+                Optional<String> result = pwDialog.showAndWait();
+                result.ifPresent(pw -> Platform.runLater(() -> runLoadService(storage, new SecureString(pw))));
+            }
+        } catch (IOException e) {
+            log.error("Could not check if wallet is encrypted", e);
         }
     }
 

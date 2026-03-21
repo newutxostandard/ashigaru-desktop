@@ -1,6 +1,7 @@
 package com.sparrowwallet.sparrow.control;
 
 import com.google.common.base.Throwables;
+import com.sparrowwallet.sparrow.EventManager;
 import com.sparrowwallet.sparrow.event.WebcamResolutionChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

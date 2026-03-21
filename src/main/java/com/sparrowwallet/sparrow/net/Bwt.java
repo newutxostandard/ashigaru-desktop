@@ -351,6 +351,11 @@ public class Bwt {
                         }
 
                         @Override
+                        public void onAccessToken(String token) {
+                            log.debug("Access token received");
+                        }
+
+                        @Override
                         public void onReady() {
                             log.debug("Bwt ready");
                             ready = true;
