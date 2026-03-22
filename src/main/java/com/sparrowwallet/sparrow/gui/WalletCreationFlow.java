@@ -289,36 +289,51 @@ public class WalletCreationFlow {
         if (wallets.isEmpty()) return;
 
         if (AppServices.onlineProperty().get()) {
+            // Non-blocking progress dialog with a Skip button so the user is never stuck
             Alert progress = new Alert(Alert.AlertType.INFORMATION);
             progress.setTitle(walletName);
             progress.setHeaderText("Discovering accounts…");
-            progress.getButtonTypes().clear();
+            ButtonType skipType = new ButtonType("Skip", ButtonBar.ButtonData.CANCEL_CLOSE);
+            progress.getButtonTypes().setAll(skipType);
             progress.initOwner(owner);
-            progress.show();
 
             ElectrumServer.WalletDiscoveryService svc = new ElectrumServer.WalletDiscoveryService(wallets);
+
+            // If user skips, cancel the discovery service
+            progress.setOnHiding(ev -> svc.cancel());
+
+            // Helper to close dialog and continue — always called exactly once
+            Runnable finish = () -> {
+                progress.setOnHiding(null); // prevent double-cancel
+                progress.close();
+            };
+
             svc.setOnSucceeded(e -> {
+                finish.run();
                 Optional<Wallet> found = svc.getValue();
                 Wallet wallet = found.orElseGet(() -> wallets.get(0));
-                addWhirlpoolAccounts(wallet);
-                Platform.runLater(() -> {
-                    progress.close();
-                    saveWallet(walletName, wallet);
-                });
+                try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
+                saveWallet(walletName, wallet);
             });
             svc.setOnFailed(e -> {
+                finish.run();
                 log.error("Account discovery failed", e.getSource().getException());
                 Wallet wallet = wallets.get(0);
-                addWhirlpoolAccounts(wallet);
-                Platform.runLater(() -> {
-                    progress.close();
-                    saveWallet(walletName, wallet);
-                });
+                try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
+                saveWallet(walletName, wallet);
             });
+            svc.setOnCancelled(e -> {
+                // Dialog already closed by user; just continue with default wallet
+                Wallet wallet = wallets.get(0);
+                try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
+                saveWallet(walletName, wallet);
+            });
+
             svc.start();
+            progress.show(); // non-blocking — callbacks close it when done
         } else {
             Wallet wallet = wallets.get(0);
-            addWhirlpoolAccounts(wallet);
+            try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
             saveWallet(walletName, wallet);
         }
     }
