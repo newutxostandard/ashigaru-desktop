@@ -42,6 +42,8 @@
                         maxWidth="Infinity" styleClass="action-btn"/>
                 <Button text="Create / Restore..." onAction="#onCreateWallet"
                         maxWidth="Infinity" styleClass="action-btn secondary-btn"/>
+                <Button text="Preferences..." onAction="#onPreferences"
+                        maxWidth="Infinity" styleClass="action-btn secondary-btn"/>
             </VBox>
         </VBox>
     </left>

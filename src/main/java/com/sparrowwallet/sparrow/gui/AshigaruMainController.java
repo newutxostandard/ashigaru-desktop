@@ -8,6 +8,7 @@ import com.sparrowwallet.drongo.wallet.Wallet;
 import com.sparrowwallet.sparrow.AppServices;
 import com.sparrowwallet.sparrow.EventManager;
 import com.sparrowwallet.sparrow.event.*;
+import com.sparrowwallet.sparrow.preferences.PreferencesDialog;
 import com.sparrowwallet.sparrow.io.Config;
 import com.sparrowwallet.sparrow.io.Storage;
 import com.sparrowwallet.sparrow.io.StorageException;
@@ -149,6 +150,13 @@ public class AshigaruMainController implements Initializable {
     @FXML
     private void onCreateWallet() {
         new WalletCreationFlow(AshigaruGui.get().getMainStage()).start();
+    }
+
+    @FXML
+    private void onPreferences() {
+        PreferencesDialog dialog = new PreferencesDialog();
+        dialog.initOwner(AshigaruGui.get().getMainStage());
+        dialog.showAndWait();
     }
 
     public void openWalletFile(File file) {
