@@ -133,16 +133,18 @@ public class AshigaruWalletController implements Initializable {
         Tab depositTab = buildAccountTab("Deposit", masterForm);
         accountTabs.getTabs().add(depositTab);
 
-        // Child wallets (Premix, Postmix, Badbank)
+        // Child wallets (Premix, Postmix, Badbank only — skip payment codes and other accounts)
         for (WalletForm nestedForm : masterForm.getNestedWalletForms()) {
             Wallet wallet = nestedForm.getWallet();
-            if (wallet.getStandardAccountType() == null) continue;
-            String tabName = switch (wallet.getStandardAccountType()) {
-                case WHIRLPOOL_PREMIX -> "Premix";
+            StandardAccount accountType = wallet.getStandardAccountType();
+            if (accountType == null) continue;
+            String tabName = switch (accountType) {
+                case WHIRLPOOL_PREMIX  -> "Premix";
                 case WHIRLPOOL_POSTMIX -> "Postmix";
                 case WHIRLPOOL_BADBANK -> "Badbank";
-                default -> wallet.getFullDisplayName();
+                default -> null;  // skip all other child accounts (payment codes, etc.)
             };
+            if (tabName == null) continue;
             accountTabs.getTabs().add(buildAccountTab(tabName, nestedForm));
         }
 
@@ -532,9 +534,12 @@ public class AshigaruWalletController implements Initializable {
 
     @Subscribe
     public void walletOpened(WalletOpenedEvent event) {
-        if (!event.getWallet().isNested()) return;
+        Wallet opened = event.getWallet();
+        // Rebuild tabs when a nested wallet (BIP47 or Whirlpool child) is opened for the
+        // currently displayed master wallet
+        if (!opened.isNested() && !opened.isWhirlpoolChildWallet()) return;
         if (currentWalletForm == null) return;
-        if (!event.getWallet().getMasterWallet().equals(currentWalletForm.getWallet())) return;
+        if (!opened.getMasterWallet().equals(currentWalletForm.getWallet())) return;
         Platform.runLater(() -> buildAccountTabs(currentWalletForm));
     }
 

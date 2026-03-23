@@ -310,6 +310,61 @@
     -fx-font-size: 14px;
 }
 
+/* ── Toggle buttons ───────────────────────────────────────────────────────── */
+.toggle-button {
+    -fx-background-color: -ag-bg-light;
+    -fx-text-fill: -ag-text-dim;
+    -fx-border-color: -ag-border;
+    -fx-border-radius: -ag-radius;
+    -fx-background-radius: -ag-radius;
+    -fx-padding: 5 14 5 14;
+    -fx-cursor: hand;
+}
+.toggle-button:hover  { -fx-background-color: -ag-bg-raised; -fx-text-fill: -ag-text; }
+.toggle-button:selected {
+    -fx-background-color: derive(-ag-accent, -65%);
+    -fx-text-fill: -ag-accent;
+    -fx-border-color: -ag-accent;
+}
+.toggle-button:selected:hover { -fx-background-color: derive(-ag-accent, -60%); }
+.toggle-button:disabled { -fx-opacity: 0.45; }
+
+/* ── View toggle bar (UTXOs / Transactions) ───────────────────────────────── */
+.view-toggle-bar {
+    -fx-background-color: -ag-bg-mid;
+    -fx-border-color: transparent;
+}
+.view-toggle-bar .toggle-button {
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-border-color: -ag-border;
+    -fx-border-width: 0 1 1 0;
+    -fx-min-width: 110;
+}
+.view-toggle-bar .toggle-button:selected {
+    -fx-border-color: -ag-border;
+    -fx-border-bottom-color: -ag-accent;
+    -fx-border-width: 0 1 2 0;
+    -fx-text-fill: -ag-accent;
+    -fx-background-color: -ag-bg;
+}
+
+/* ── Badbank info bar ─────────────────────────────────────────────────────── */
+.badbank-info-bar {
+    -fx-background-color: derive(-ag-testnet, -75%);
+    -fx-border-color: -ag-testnet;
+    -fx-border-width: 0 0 1 0;
+}
+.badbank-warning-icon { -fx-text-fill: -ag-testnet; -fx-font-size: 14px; }
+.badbank-info-text    { -fx-text-fill: -ag-testnet; -fx-font-size: 11px; }
+
+/* ── Receive dialog ───────────────────────────────────────────────────────── */
+.address-field {
+    -fx-font-family: monospace;
+    -fx-font-size: 11px;
+    -fx-text-fill: -ag-accent;
+}
+
 /* ── Separator ────────────────────────────────────────────────────────────── */
 .separator .line { -fx-border-color: -ag-border; }
 

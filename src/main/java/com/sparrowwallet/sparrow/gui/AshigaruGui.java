@@ -125,13 +125,20 @@ public class AshigaruGui extends Application {
     // -------------------------------------------------------------------------
 
     public static void addWallet(Storage storage, Wallet wallet) {
-        if (wallet.isNested()) {
+        if (wallet.isNested() || wallet.isWhirlpoolChildWallet()) {
+            // BIP47 payment-code wallets and Whirlpool child wallets (Premix/Postmix/Badbank)
+            // all go into the master wallet's nested forms list
             String masterId = storage.getWalletId(wallet.getMasterWallet());
             WalletForm masterForm = instance.walletForms.get(masterId);
             if (masterForm != null) {
-                WalletForm childForm = new WalletForm(storage, wallet);
-                EventManager.get().register(childForm);
-                masterForm.getNestedWalletForms().add(childForm);
+                // Avoid duplicates when called multiple times
+                boolean alreadyAdded = masterForm.getNestedWalletForms().stream()
+                        .anyMatch(f -> f.getWallet().equals(wallet));
+                if (!alreadyAdded) {
+                    WalletForm childForm = new WalletForm(storage, wallet);
+                    EventManager.get().register(childForm);
+                    masterForm.getNestedWalletForms().add(childForm);
+                }
             }
         } else {
             EventManager.get().post(new WalletOpeningEvent(storage, wallet));
@@ -161,6 +168,16 @@ public class AshigaruGui extends Application {
         }
 
         EventManager.get().post(new WalletOpenedEvent(storage, wallet));
+    }
+
+    public static void removeWallet(String walletId) {
+        WalletForm form = instance.walletForms.remove(walletId);
+        if (form != null) {
+            EventManager.get().unregister(form);
+            for (WalletForm nested : form.getNestedWalletForms()) {
+                EventManager.get().unregister(nested);
+            }
+        }
     }
 
     // -------------------------------------------------------------------------

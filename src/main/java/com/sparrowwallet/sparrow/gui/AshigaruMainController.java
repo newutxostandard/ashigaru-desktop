@@ -9,6 +9,7 @@ import com.sparrowwallet.sparrow.AppServices;
 import com.sparrowwallet.sparrow.EventManager;
 import com.sparrowwallet.sparrow.event.*;
 import com.sparrowwallet.sparrow.preferences.PreferencesController;
+import com.sparrowwallet.sparrow.preferences.PreferenceGroup;
 import com.sparrowwallet.sparrow.io.Config;
 import com.sparrowwallet.sparrow.io.Storage;
 import com.sparrowwallet.sparrow.io.StorageException;
@@ -23,6 +24,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import com.sparrowwallet.sparrow.io.Storage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -50,7 +52,7 @@ public class AshigaruMainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         walletListView.setItems(walletItems);
-        walletListView.setCellFactory(lv -> new WalletListCell());
+        walletListView.setCellFactory(lv -> new WalletListCell(this));
         walletListView.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
             if (selected != null) {
                 showWalletPanel(selected.walletId());
@@ -67,11 +69,22 @@ public class AshigaruMainController implements Initializable {
     // Navigation
     // -------------------------------------------------------------------------
 
+    private void maybeReconnectOnLeavingPrefs() {
+        if (contentPane.getUserData() instanceof PreferencesController prefsCtrl) {
+            if (prefsCtrl.isReconnectOnClosing() && !(AppServices.isConnecting() || AppServices.isConnected())) {
+                EventManager.get().post(new RequestConnectEvent());
+            }
+            contentPane.setUserData(null);
+        }
+    }
+
     private void showWelcome() {
+        maybeReconnectOnLeavingPrefs();
         contentPane.setCenter(welcomePane);
     }
 
     private void showWalletPanel(String walletId) {
+        maybeReconnectOnLeavingPrefs();
         try {
             WalletForm walletForm = AshigaruGui.get().getWalletForms().get(walletId);
             if (walletForm == null) return;
@@ -154,6 +167,30 @@ public class AshigaruMainController implements Initializable {
         new WalletCreationFlow(AshigaruGui.get().getMainStage()).start();
     }
 
+    void deleteWallet(WalletListItem item) {
+        WalletForm form = AshigaruGui.get().getWalletForms().get(item.walletId());
+        if (form == null) return;
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Delete Wallet");
+        confirm.setHeaderText("Delete \"" + item.displayName() + "\"?");
+        confirm.setContentText("This will permanently delete the wallet file. This cannot be undone.");
+        confirm.initOwner(AshigaruGui.get().getMainStage());
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn != ButtonType.OK) return;
+            Storage.DeleteWalletService svc = new Storage.DeleteWalletService(form.getStorage(), false);
+            svc.setOnSucceeded(e -> Platform.runLater(() -> {
+                AshigaruGui.removeWallet(item.walletId());
+                refreshWalletList();
+                showWelcome();
+            }));
+            svc.setOnFailed(e -> Platform.runLater(() ->
+                    AppServices.showErrorDialog("Delete Failed",
+                            svc.getException().getMessage())));
+            svc.start();
+        });
+    }
+
     @FXML
     private void onPreferences() {
         try {
@@ -164,6 +201,8 @@ public class AshigaruMainController implements Initializable {
             prefsController.reconnectOnClosingProperty().set(AppServices.isConnecting() || AppServices.isConnected());
             contentPane.setCenter(prefsPanel);
             contentPane.setUserData(prefsController);
+            // Auto-navigate to General so preferences never opens blank
+            prefsController.selectGroup(PreferenceGroup.GENERAL);
         } catch (IOException e) {
             log.error("Error loading preferences panel", e);
             AppServices.showErrorDialog("Error", "Could not load preferences: " + e.getMessage());
@@ -253,7 +292,14 @@ public class AshigaruMainController implements Initializable {
 
     @Subscribe
     public void connectionEvent(ConnectionEvent event) {
-        Platform.runLater(() -> updateConnectionLabel(true));
+        Platform.runLater(() -> {
+            updateConnectionLabel(true);
+            // Update block height immediately on connection if available
+            Integer height = AppServices.getCurrentBlockHeight();
+            if (height != null) {
+                blockHeightLabel.setText("Block " + height);
+            }
+        });
     }
 
     @Subscribe
@@ -288,10 +334,24 @@ public class AshigaruMainController implements Initializable {
     }
 
     private static class WalletListCell extends ListCell<WalletListItem> {
+        private final AshigaruMainController controller;
+
+        WalletListCell(AshigaruMainController controller) {
+            this.controller = controller;
+        }
+
         @Override
         protected void updateItem(WalletListItem item, boolean empty) {
             super.updateItem(item, empty);
-            setText(empty || item == null ? null : item.displayName());
+            if (empty || item == null) {
+                setText(null);
+                setContextMenu(null);
+            } else {
+                setText(item.displayName());
+                MenuItem deleteItem = new MenuItem("Delete Wallet...");
+                deleteItem.setOnAction(e -> controller.deleteWallet(item));
+                setContextMenu(new ContextMenu(deleteItem));
+            }
         }
     }
 }
