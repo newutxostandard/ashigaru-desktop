@@ -31,6 +31,10 @@
     -fx-text-fill:        -ag-text;
     -fx-font-family:      "RobotoMono Regular", "Monospaced", monospace;
     -fx-font-size:        13px;
+    /* Replace Modena's blue accent/focus with our red */
+    -fx-accent:           -ag-accent;
+    -fx-focus-color:      -ag-accent;
+    -fx-faint-focus-color: derive(-ag-accent, -75%);
 }
 
 .root-pane {
