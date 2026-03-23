@@ -201,6 +201,7 @@ public class AshigaruMainController implements Initializable {
 
     @FXML
     private void onPreferences() {
+        walletListView.getSelectionModel().clearSelection();
         try {
             FXMLLoader loader = new FXMLLoader(AppServices.class.getResource("preferences/preferences.fxml"));
             Node prefsPanel = loader.load();
