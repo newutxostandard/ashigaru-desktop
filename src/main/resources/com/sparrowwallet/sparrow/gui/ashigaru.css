@@ -136,6 +136,14 @@
 
 .mix-btn { -fx-min-width: 140; }
 .refresh-btn { -fx-font-size: 11px; -fx-padding: 4 10 4 10; }
+.delete-btn {
+    -fx-background-color: derive(-ag-accent, -70%);
+    -fx-text-fill: -ag-accent;
+    -fx-border-color: -ag-accent-dark;
+    -fx-font-size: 11px;
+    -fx-padding: 4 10 4 10;
+}
+.delete-btn:hover { -fx-background-color: derive(-ag-accent, -55%); }
 
 /* ── Content area ─────────────────────────────────────────────────────────── */
 .content-area {
@@ -386,3 +394,46 @@
 .scroll-bar .decrement-arrow {
     -fx-background-color: -ag-text-faint;
 }
+
+/* ── Context menus ────────────────────────────────────────────────────────── */
+.context-menu {
+    -fx-background-color: -ag-bg-raised;
+    -fx-border-color: -ag-border;
+    -fx-border-radius: -ag-radius;
+    -fx-background-radius: -ag-radius;
+    -fx-padding: 4 0 4 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 8, 0, 0, 2);
+}
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 6 16 6 16;
+}
+.menu-item .label {
+    -fx-text-fill: -ag-text;
+    -fx-font-size: 12px;
+}
+.menu-item:hover, .menu-item:focused {
+    -fx-background-color: derive(-ag-accent, -65%);
+}
+.menu-item:hover .label, .menu-item:focused .label {
+    -fx-text-fill: -ag-accent;
+}
+
+/* ── Preferences panel toggle buttons (use styleClass="list-item") ─────────── */
+.list-item {
+    -fx-background-color: -ag-bg-light;
+    -fx-text-fill: -ag-text-dim;
+    -fx-border-color: -ag-border;
+    -fx-border-radius: -ag-radius;
+    -fx-background-radius: -ag-radius;
+    -fx-padding: 5 14 5 14;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+}
+.list-item:hover { -fx-background-color: -ag-bg-raised; -fx-text-fill: -ag-text; }
+.list-item:selected {
+    -fx-background-color: derive(-ag-accent, -65%);
+    -fx-text-fill: -ag-accent;
+    -fx-border-color: -ag-accent;
+}
+.list-item:selected:hover { -fx-background-color: derive(-ag-accent, -60%); }

@@ -167,6 +167,13 @@ public class AshigaruMainController implements Initializable {
         new WalletCreationFlow(AshigaruGui.get().getMainStage()).start();
     }
 
+    void deleteWallet(String walletId) {
+        WalletListItem item = walletItems.stream()
+                .filter(i -> i.walletId().equals(walletId))
+                .findFirst().orElse(null);
+        if (item != null) deleteWallet(item);
+    }
+
     void deleteWallet(WalletListItem item) {
         WalletForm form = AshigaruGui.get().getWalletForms().get(item.walletId());
         if (form == null) return;
@@ -181,6 +188,7 @@ public class AshigaruMainController implements Initializable {
             Storage.DeleteWalletService svc = new Storage.DeleteWalletService(form.getStorage(), false);
             svc.setOnSucceeded(e -> Platform.runLater(() -> {
                 AshigaruGui.removeWallet(item.walletId());
+                walletListView.getSelectionModel().clearSelection();
                 refreshWalletList();
                 showWelcome();
             }));

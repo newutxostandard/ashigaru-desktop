@@ -474,6 +474,12 @@ public class AshigaruWalletController implements Initializable {
     }
 
     @FXML
+    private void onDelete() {
+        if (currentWalletForm == null) return;
+        AshigaruGui.get().getMainController().deleteWallet(currentWalletForm.getWalletId());
+    }
+
+    @FXML
     private void onRefresh() {
         if (activeAccountForm != null) {
             activeAccountForm.refreshHistory(AppServices.getCurrentBlockHeight());
