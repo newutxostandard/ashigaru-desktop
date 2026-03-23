@@ -5,22 +5,22 @@
 
 /* ── Palette ──────────────────────────────────────────────────────────────── */
 * {
-    -ag-bg:           #1a1a1a;
-    -ag-bg-mid:       #242424;
-    -ag-bg-light:     #2e2e2e;
-    -ag-bg-raised:    #363636;
-    -ag-border:       #3d3d3d;
-    -ag-text:         #e8e8e8;
-    -ag-text-dim:     #9a9a9a;
-    -ag-text-faint:   #606060;
-    -ag-accent:       #f7931a;   /* Bitcoin orange */
-    -ag-accent-dark:  #c76e10;
+    -ag-bg:           #0d0d0d;
+    -ag-bg-mid:       #161616;
+    -ag-bg-light:     #1e1e1e;
+    -ag-bg-raised:    #282828;
+    -ag-border:       #2a2a2a;
+    -ag-text:         #e0e0e0;
+    -ag-text-dim:     #888888;
+    -ag-text-faint:   #505050;
+    -ag-accent:       #cc1111;   /* Ashigaru red */
+    -ag-accent-dark:  #991010;
     -ag-green:        #4caf50;
-    -ag-red:          #e53935;
+    -ag-red:          #cc1111;
     -ag-blue:         #42a5f5;
-    -ag-testnet:      #f7931a;
+    -ag-testnet:      #e57c00;
     -ag-mainnet:      #4caf50;
-    -ag-radius:       4px;
+    -ag-radius:       3px;
 }
 
 /* ── Root / Scene ─────────────────────────────────────────────────────────── */

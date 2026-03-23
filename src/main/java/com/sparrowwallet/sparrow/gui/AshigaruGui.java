@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -65,6 +66,15 @@ public class AshigaruGui extends Application {
         stage.setMinWidth(800);
         stage.setMinHeight(540);
         stage.setScene(scene);
+
+        // Set app icon — replace sparrow-icon.png with ashigaru-icon.png when available
+        try {
+            Image icon = new Image(getClass().getResourceAsStream("/image/sparrow-icon.png"));
+            stage.getIcons().add(icon);
+        } catch(Exception e) {
+            log.warn("Could not load application icon", e);
+        }
+
         stage.show();
 
         // Restore recently opened wallets

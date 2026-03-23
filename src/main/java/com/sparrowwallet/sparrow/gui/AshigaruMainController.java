@@ -8,7 +8,7 @@ import com.sparrowwallet.drongo.wallet.Wallet;
 import com.sparrowwallet.sparrow.AppServices;
 import com.sparrowwallet.sparrow.EventManager;
 import com.sparrowwallet.sparrow.event.*;
-import com.sparrowwallet.sparrow.preferences.PreferencesDialog;
+import com.sparrowwallet.sparrow.preferences.PreferencesController;
 import com.sparrowwallet.sparrow.io.Config;
 import com.sparrowwallet.sparrow.io.Storage;
 import com.sparrowwallet.sparrow.io.StorageException;
@@ -93,7 +93,9 @@ public class AshigaruMainController implements Initializable {
 
         walletItems.clear();
         for (WalletForm form : AshigaruGui.get().getWalletForms().values()) {
-            walletItems.add(new WalletListItem(form.getWalletId(), form.getWallet().getFullDisplayName()));
+            if (form.getWallet().isMasterWallet()) {
+                walletItems.add(new WalletListItem(form.getWalletId(), form.getWallet().getFullDisplayName()));
+            }
         }
 
         if (currentSelection != null) {
@@ -154,9 +156,18 @@ public class AshigaruMainController implements Initializable {
 
     @FXML
     private void onPreferences() {
-        PreferencesDialog dialog = new PreferencesDialog();
-        dialog.initOwner(AshigaruGui.get().getMainStage());
-        dialog.showAndWait();
+        try {
+            FXMLLoader loader = new FXMLLoader(AppServices.class.getResource("preferences/preferences.fxml"));
+            Node prefsPanel = loader.load();
+            PreferencesController prefsController = loader.getController();
+            prefsController.initializeView(Config.get());
+            prefsController.reconnectOnClosingProperty().set(AppServices.isConnecting() || AppServices.isConnected());
+            contentPane.setCenter(prefsPanel);
+            contentPane.setUserData(prefsController);
+        } catch (IOException e) {
+            log.error("Error loading preferences panel", e);
+            AppServices.showErrorDialog("Error", "Could not load preferences: " + e.getMessage());
+        }
     }
 
     public void openWalletFile(File file) {
