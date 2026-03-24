@@ -203,15 +203,20 @@ public class AshigaruMainController implements Initializable {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn != ButtonType.OK) return;
             Storage.DeleteWalletService svc = new Storage.DeleteWalletService(form.getStorage(), false);
-            svc.setOnSucceeded(e -> Platform.runLater(() -> {
+            // DeleteWalletService extends ScheduledService, which auto-restarts after each run.
+            // Cancel immediately on completion (success or failure) to prevent repeated setOnSucceeded
+            // calls that would keep calling showWelcome() and wiping out any newly opened wallet.
+            svc.setOnSucceeded(e -> {
+                svc.cancel();
                 AshigaruGui.removeWallet(item.walletId());
                 walletListView.getSelectionModel().clearSelection();
                 refreshWalletList();
                 showWelcome();
-            }));
-            svc.setOnFailed(e -> Platform.runLater(() ->
-                    AppServices.showErrorDialog("Delete Failed",
-                            svc.getException().getMessage())));
+            });
+            svc.setOnFailed(e -> {
+                svc.cancel();
+                AppServices.showErrorDialog("Delete Failed", svc.getException().getMessage());
+            });
             svc.start();
         });
     }
