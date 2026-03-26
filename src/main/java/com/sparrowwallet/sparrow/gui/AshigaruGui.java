@@ -177,19 +177,21 @@ public class AshigaruGui extends Application {
             for (WalletForm nested : form.getNestedWalletForms()) {
                 EventManager.get().unregister(nested);
             }
+            // Mirror the cleanup WalletForm.walletTabsClosed() normally performs
+            if (form.getWallet().isMasterWallet()) {
+                form.getStorage().close();
+            }
+            if (form.getWallet().isValid()) {
+                AppServices.clearTransactionHistoryCache(form.getWallet());
+            }
         }
+
+        // Sync AppServices.walletWindows — without this, getOpenWallets() returns a stale
+        // entry for the deleted wallet, breaking all subsequent commands that call it.
+        List<WalletTabData> tabDataList = instance.walletForms.values().stream()
+                .map(f -> new WalletTabData(TabData.TabType.WALLET, f))
+                .collect(Collectors.toList());
+        EventManager.get().post(new OpenWalletsEvent(DEFAULT_WINDOW, tabDataList));
     }
 
-    // -------------------------------------------------------------------------
-    // Global event subscriptions
-    // -------------------------------------------------------------------------
-
-    @Subscribe
-    public void walletOpened(WalletOpenedEvent event) {
-        if (event.getWallet().isMasterWallet()) {
-            Platform.runLater(() -> {
-                if (mainController != null) mainController.refreshWalletList();
-            });
-        }
-    }
 }
