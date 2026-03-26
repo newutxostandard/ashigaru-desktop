@@ -441,3 +441,15 @@
     -fx-border-color: -ag-accent;
 }
 .list-item:selected:hover { -fx-background-color: derive(-ag-accent, -60%); }
+
+/* ── ControlsFX ToggleSwitch: override blue from darktheme.css ──────────── */
+.toggle-switch .thumb-area {
+    -fx-background-color: #3a3a3a;
+    -fx-background-insets: 0;
+    -fx-background-radius: 100;
+}
+.toggle-switch:selected .thumb-area {
+    -fx-background-color: -ag-accent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 100;
+}
