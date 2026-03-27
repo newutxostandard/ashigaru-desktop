@@ -44,6 +44,7 @@ public class AshigaruWalletController implements Initializable {
     @FXML private Label mempoolLabel;
     @FXML private Label utxoCountLabel;
     @FXML private HBox badbankInfoBar;
+    @FXML private Label badbankInfoLabel;
     @FXML private ToggleButton utxoViewBtn;
     @FXML private ToggleButton txnViewBtn;
     @FXML private TableView<UtxoRow> utxoTable;
