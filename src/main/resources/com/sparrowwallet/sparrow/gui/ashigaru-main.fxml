@@ -42,13 +42,17 @@
                 </Label>
 
                 <ToggleButton fx:id="depositBtn" text="Deposit" toggleGroup="$accountToggleGroup"
-                              styleClass="account-btn" maxWidth="Infinity" onAction="#onAccountSelected"/>
+                              styleClass="account-btn" maxWidth="Infinity" maxHeight="Infinity"
+                              VBox.vgrow="ALWAYS" onAction="#onAccountSelected"/>
                 <ToggleButton fx:id="premixBtn" text="Premix" toggleGroup="$accountToggleGroup"
-                              styleClass="account-btn" maxWidth="Infinity" onAction="#onAccountSelected"/>
+                              styleClass="account-btn" maxWidth="Infinity" maxHeight="Infinity"
+                              VBox.vgrow="ALWAYS" onAction="#onAccountSelected"/>
                 <ToggleButton fx:id="postmixBtn" text="Postmix" toggleGroup="$accountToggleGroup"
-                              styleClass="account-btn" maxWidth="Infinity" onAction="#onAccountSelected"/>
+                              styleClass="account-btn" maxWidth="Infinity" maxHeight="Infinity"
+                              VBox.vgrow="ALWAYS" onAction="#onAccountSelected"/>
                 <ToggleButton fx:id="badbankBtn" text="Badbank" toggleGroup="$accountToggleGroup"
-                              styleClass="account-btn" maxWidth="Infinity" onAction="#onAccountSelected"/>
+                              styleClass="account-btn" maxWidth="Infinity" maxHeight="Infinity"
+                              VBox.vgrow="ALWAYS" onAction="#onAccountSelected"/>
             </VBox>
 
             <!-- Padding to push actions to bottom when accounts are shown -->

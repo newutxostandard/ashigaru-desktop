@@ -436,7 +436,7 @@
     -fx-border-color: transparent;
     -fx-border-radius: 0;
     -fx-background-radius: 0;
-    -fx-padding: 10 16 10 16;
+    -fx-padding: 0 16 0 16;
     -fx-cursor: hand;
     -fx-alignment: CENTER_LEFT;
     -fx-font-size: 13px;

@@ -49,6 +49,7 @@ public class AshigaruMainController implements Initializable {
 
     // Account sidebar controls
     @FXML private VBox accountButtonsBox;
+    @FXML private Region sidebarSpacer;
     @FXML private ToggleGroup accountToggleGroup;
     @FXML private ToggleButton depositBtn;
     @FXML private ToggleButton premixBtn;
@@ -106,6 +107,8 @@ public class AshigaruMainController implements Initializable {
         walletSelector.setVisible(false);
         accountButtonsBox.setVisible(false);
         accountButtonsBox.setManaged(false);
+        sidebarSpacer.setVisible(true);
+        sidebarSpacer.setManaged(true);
     }
 
     private void selectWallet(String walletId) {
@@ -115,10 +118,12 @@ public class AshigaruMainController implements Initializable {
         currentWalletForm = walletForm;
         selectedAccount = StandardAccount.ACCOUNT_0; // Default to Deposit
 
-        // Show account sidebar and wallet selector
+        // Show account sidebar and wallet selector; hide spacer so buttons fill the height
         walletSelector.setVisible(true);
         accountButtonsBox.setVisible(true);
         accountButtonsBox.setManaged(true);
+        sidebarSpacer.setVisible(false);
+        sidebarSpacer.setManaged(false);
 
         // Select Deposit by default
         depositBtn.setSelected(true);
