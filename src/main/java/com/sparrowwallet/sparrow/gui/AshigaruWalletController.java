@@ -57,11 +57,12 @@ public class AshigaruWalletController implements Initializable {
     @FXML private TableColumn<TxnRow, String> colTxnId;
     @FXML private TableColumn<TxnRow, String> colTxnLabel;
     @FXML private TableColumn<TxnRow, String> colTxnAmount;
+    @FXML private Label accountNameLabel;
+    @FXML private Button receiveCta;
     @FXML private HBox mixButtonBox;
     @FXML private Button startMixBtn;
     @FXML private Button mixToBtn;
     @FXML private Button mixSelectedBtn;
-    @FXML private VBox accountPanel;
 
     private WalletForm currentWalletForm;   // master wallet form
     private WalletForm activeAccountForm;   // currently shown account form
@@ -211,11 +212,16 @@ public class AshigaruWalletController implements Initializable {
             refreshTransactionTable();
         }
 
-        // Receive button — only for Deposit (master wallet)
+        // Account name label
+        accountNameLabel.setText(getAccountDisplayName(wallet));
+
+        // Receive button and empty-state CTA — only for Deposit (master wallet)
         boolean isDeposit = wallet.isMasterWallet() || wallet.getStandardAccountType() == null
                 || wallet.getStandardAccountType() == StandardAccount.ACCOUNT_0;
         receiveBtn.setVisible(isDeposit);
         receiveBtn.setManaged(isDeposit);
+        receiveCta.setVisible(isDeposit);
+        receiveCta.setManaged(isDeposit);
 
         // Badbank info bar
         boolean isBadbank = wallet.getStandardAccountType() == StandardAccount.WHIRLPOOL_BADBANK;
@@ -285,6 +291,7 @@ public class AshigaruWalletController implements Initializable {
         startMixBtn.setVisible(false);
         mixToBtn.setVisible(false);
         mixSelectedBtn.setVisible(false);
+        mixSelectedBtn.setManaged(false);
         mixButtonBox.setVisible(false);
 
         if (wallet.isWhirlpoolMixWallet()) {
@@ -296,17 +303,19 @@ public class AshigaruWalletController implements Initializable {
             startMixBtn.setText(isMixing ? "Stop Mixing" : "Start Mixing");
             startMixBtn.setDisable(!AppServices.onlineProperty().get());
 
-            // Postmix also shows Mix To and Mix Selected
+            // Postmix also shows Mix To and Mix Selected (in the toggle bar above the table)
             if (wallet.getStandardAccountType() == StandardAccount.WHIRLPOOL_POSTMIX) {
                 mixToBtn.setVisible(true);
                 mixSelectedBtn.setVisible(true);
+                mixSelectedBtn.setManaged(true);
                 mixSelectedBtn.setDisable(true);
                 updateMixToButton();
             }
         } else if (WhirlpoolServices.canWalletMix(wallet)) {
-            // Deposit / Badbank — show Mix Selected to initiate Tx0
-            mixButtonBox.setVisible(true);
+            // Deposit / Badbank — show Mix Selected (in the toggle bar above the table)
+            // mixButtonBox is NOT shown since Start Mixing / Mix To are not needed here
             mixSelectedBtn.setVisible(true);
+            mixSelectedBtn.setManaged(true);
             mixSelectedBtn.setText("Mix Selected UTXOs");
             mixSelectedBtn.setDisable(true);
         }
@@ -350,6 +359,11 @@ public class AshigaruWalletController implements Initializable {
         } catch (Exception e) {
             log.error("Error opening Receive dialog", e);
         }
+    }
+
+    @FXML
+    private void onReceiveCta() {
+        onReceive();
     }
 
     @FXML
@@ -559,6 +573,19 @@ public class AshigaruWalletController implements Initializable {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    private String getAccountDisplayName(Wallet wallet) {
+        if (wallet.isMasterWallet() || wallet.getStandardAccountType() == null
+                || wallet.getStandardAccountType() == StandardAccount.ACCOUNT_0) {
+            return "Deposit";
+        }
+        return switch (wallet.getStandardAccountType()) {
+            case WHIRLPOOL_PREMIX  -> "Premix";
+            case WHIRLPOOL_POSTMIX -> "Postmix";
+            case WHIRLPOOL_BADBANK -> "Badbank";
+            default -> wallet.getDisplayName();
+        };
+    }
 
     private static String abbreviate(String s) {
         if (s.length() <= 12) return s;
