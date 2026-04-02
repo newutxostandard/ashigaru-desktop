@@ -263,7 +263,9 @@ public class AshigaruWalletController implements Initializable {
         txnRows.clear();
 
         WalletTransactionsEntry txnEntry = activeAccountForm.getWalletTransactionsEntry();
-        if (txnEntry == null || txnEntry.getChildren() == null) return;
+        if (txnEntry == null) return;
+        txnEntry.updateTransactions();
+        if (txnEntry.getChildren() == null) return;
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         UnitFormat fmt = Config.get().getUnitFormat() == null ? UnitFormat.DOT : Config.get().getUnitFormat();
@@ -523,6 +525,7 @@ public class AshigaruWalletController implements Initializable {
         if (activeAccountForm != null && event.getWallet().equals(activeAccountForm.getWallet())) {
             Platform.runLater(() -> {
                 activeAccountForm.getWalletUtxosEntry().updateUtxos();
+                activeAccountForm.getWalletTransactionsEntry().updateTransactions();
                 refreshAccountView();
             });
         }

@@ -51,8 +51,8 @@ public class AshigaruTx0Controller implements Initializable {
     @FXML private Label unmixedChangeValue;
     @FXML private Label minerFeeValue;
     @FXML private Label totalFeesValue;
-    @FXML private Button broadcastBtn;
-    @FXML private Button cancelBtn;
+    @FXML private ButtonType broadcastBtnType;
+    private Button broadcastBtn;   // resolved in show() via lookupButton
 
     // Set by show() before the dialog is displayed
     private String walletId;
@@ -65,8 +65,7 @@ public class AshigaruTx0Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        broadcastBtn.setDisable(true);
-
+        // broadcastBtn is resolved in show() via lookupButton — not injectable from <buttonTypes>
         poolCombo.setItems(FXCollections.observableArrayList());
         poolCombo.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
             if (sel != null && sel.pool() != null) {
@@ -111,6 +110,10 @@ public class AshigaruTx0Controller implements Initializable {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(AshigaruGui.get().getMainStage());
         ctrl.dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+
+        // Resolve the Broadcast button node from the DialogPane and start it disabled
+        ctrl.broadcastBtn = (Button) pane.lookupButton(ctrl.broadcastBtnType);
+        ctrl.broadcastBtn.setDisable(true);
 
         // Wire Broadcast / Cancel to dialog result
         dialog.setResultConverter(btn -> {
@@ -278,12 +281,6 @@ public class AshigaruTx0Controller implements Initializable {
     @FXML
     private void onBroadcast() {
         // selectedPool is already set by applyPreview(); dialog result converter will pick it up
-        dialogStage.close();
-    }
-
-    @FXML
-    private void onCancel() {
-        selectedPool = null;
         dialogStage.close();
     }
 

@@ -5,15 +5,15 @@
 /* ── Left nav sidebar ─────────────────────────────────────────────────────── */
 .list-menu {
     -fx-pref-width: 160;
-    -fx-background-color: #161616;
-    -fx-border-color: #2a2a2a;
+    -fx-background-color: -ag-bg-mid;
+    -fx-border-color: -ag-border;
     -fx-border-width: 0 1 0 0;
 }
 
 .list-item {
     -fx-pref-width: 160;
     -fx-padding: 0 20 0 20;
-    -fx-background-color: #161616;
+    -fx-background-color: -ag-bg-mid;
     -fx-background-insets: 0;
     -fx-background-radius: 0;
     -fx-border-width: 0;
@@ -22,36 +22,36 @@
 }
 
 .list-item * {
-    -fx-fill: #888888;
-    -fx-text-fill: #888888;
+    -fx-fill: -ag-text-dim;
+    -fx-text-fill: -ag-text-dim;
 }
 
 .list-item .label {
-    -fx-text-fill: #888888;
+    -fx-text-fill: -ag-text-dim;
 }
 
 .list-item:hover {
-    -fx-background-color: #1e1e1e;
+    -fx-background-color: -ag-bg-raised;
     -fx-background-insets: 0;
 }
 
 .list-item:hover .label,
 .list-item:hover * {
-    -fx-text-fill: #e0e0e0;
-    -fx-fill: #e0e0e0;
+    -fx-text-fill: -ag-text;
+    -fx-fill: -ag-text;
 }
 
 .list-item:focused {
-    -fx-background-color: #161616;
+    -fx-background-color: -ag-bg-mid;
     -fx-background-insets: 0;
 }
 
 .list-item:selected,
 .list-item:focused:selected {
-    -fx-background-color: #1e1e1e;
+    -fx-background-color: -ag-bg-raised;
     -fx-background-insets: 0;
     -fx-background-radius: 0;
-    -fx-border-color: #cc1111;
+    -fx-border-color: -ag-accent;
     -fx-border-width: 0 0 0 3;
 }
 
@@ -59,13 +59,13 @@
 .list-item:selected *,
 .list-item:focused:selected .label,
 .list-item:focused:selected * {
-    -fx-text-fill: #cc1111;
-    -fx-fill: #cc1111;
+    -fx-text-fill: -ag-accent;
+    -fx-fill: -ag-accent;
 }
 
 /* ── Main preferences area ────────────────────────────────────────────────── */
 #preferencesPane {
-    -fx-background-color: #0d0d0d;
+    -fx-background-color: -ag-bg;
 }
 
 .scroll-pane {
@@ -75,25 +75,25 @@
 /* ── Form fields (tornadofx) ──────────────────────────────────────────────── */
 .form .fieldset-header,
 .form .fieldset-header .label {
-    -fx-text-fill: #cc1111;
+    -fx-text-fill: -ag-accent;
     -fx-font-weight: bold;
 }
 
 .form .field .label {
-    -fx-text-fill: #888888;
+    -fx-text-fill: -ag-text-dim;
 }
 
 /* ── Server type icons ────────────────────────────────────────────────────── */
 .public-warning {
-    -fx-text-fill: #e57c00;
+    -fx-text-fill: -ag-testnet;
 }
 
 .public-electrum {
-    -fx-text-fill: #cc1111;
+    -fx-text-fill: -ag-accent;
 }
 
 .private-electrum {
-    -fx-text-fill: #cc1111;
+    -fx-text-fill: -ag-accent;
 }
 
 #electrumUseSsl {
