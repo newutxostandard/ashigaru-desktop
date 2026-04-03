@@ -105,7 +105,7 @@ public class Whirlpool {
         DataSourceFactory dataSourceFactory = (whirlpoolWallet, bip44w, dataPersister) -> new SparrowDataSource(whirlpoolWallet, bip44w, dataPersister);
 
         boolean onion = (torProxy != null);
-        String serverUrl = whirlpoolServer.getServerUrl(true);
+        String serverUrl = whirlpoolServer.getServerUrl(onion);
         String serverUrlOutputReg = whirlpoolServer.getServerUrlOutputReg();
         ServerApi serverApi = new ServerApi(serverUrl, serverUrlOutputReg, httpClientService);
 

@@ -6,7 +6,7 @@ import com.samourai.http.client.IHttpClientService;
 import com.samourai.whirlpool.client.utils.ClientUtils;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.ProxyConfiguration;
-import org.eclipse.jetty.client.Socks5Proxy;
+import org.eclipse.jetty.client.Socks4Proxy;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
@@ -107,7 +107,7 @@ public class JavaHttpClientService implements IHttpClientService {
     }
 
     public static ProxyConfiguration.Proxy computeJettyProxy(HostAndPort proxy) {
-        return new Socks5Proxy(proxy.getHost(), proxy.getPort());
+        return new Socks4Proxy(proxy.getHost(), proxy.getPort());
     }
 
     public void shutdown() {
