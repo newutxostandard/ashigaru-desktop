@@ -44,7 +44,7 @@
         <padding><Insets top="8" right="16" bottom="8" left="16"/></padding>
         <Label text="⚠" styleClass="badbank-warning-icon"/>
         <Label fx:id="badbankInfoLabel"
-               text="Doxxic Change — these UTXOs were not mixed. Select them and use 'Mix Selected UTXOs' to re-enter a smaller pool, or handle them carefully as described in the guide."
+               text="Spending these UTXOs is not advised. Please consider mixing in a smaller pool or an atomic swap to XMR."
                styleClass="badbank-info-text" wrapText="true"/>
     </HBox>
 
@@ -54,6 +54,8 @@
         <ToggleButton fx:id="utxoViewBtn"  text="UTXOs"        onAction="#onViewToggle" styleClass="view-toggle-btn" selected="true"/>
         <ToggleButton fx:id="txnViewBtn"   text="Transactions" onAction="#onViewToggle" styleClass="view-toggle-btn"/>
         <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="labelSelectedBtn" text="Label Selection" onAction="#onLabelSelected"
+                styleClass="action-btn" visible="false" managed="false"/>
         <Button fx:id="mixSelectedBtn" text="Mix Selected UTXOs" onAction="#onMixSelected"
                 styleClass="primary-btn mix-btn" visible="false" managed="false"/>
     </HBox>
@@ -63,10 +65,12 @@
     <!-- UTXO table -->
     <TableView fx:id="utxoTable" styleClass="utxo-table" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colDate"   text="Date"    prefWidth="160" minWidth="120"/>
-            <TableColumn fx:id="colOutput" text="Output"  prefWidth="220" minWidth="160"/>
-            <TableColumn fx:id="colMixes"  text="Mixes"   prefWidth="80"  minWidth="60"/>
-            <TableColumn fx:id="colValue"  text="Value"   prefWidth="160" minWidth="120"/>
+            <TableColumn fx:id="colDate"    text="Date"    prefWidth="160" minWidth="120"/>
+            <TableColumn fx:id="colOutput"  text="Output"  prefWidth="220" minWidth="160"/>
+            <TableColumn fx:id="colAddress" text="Address" prefWidth="240" minWidth="160"/>
+            <TableColumn fx:id="colLabel"   text="Label"   prefWidth="160" minWidth="100"/>
+            <TableColumn fx:id="colMixes"   text="Mixes"   prefWidth="80"  minWidth="60"/>
+            <TableColumn fx:id="colValue"   text="Value"   prefWidth="160" minWidth="120"/>
         </columns>
         <placeholder>
             <VBox alignment="CENTER" spacing="12" styleClass="empty-state">
