@@ -9,7 +9,9 @@ import com.sparrowwallet.drongo.wallet.*;
 import com.sparrowwallet.sparrow.AppServices;
 import com.sparrowwallet.sparrow.EventManager;
 import com.sparrowwallet.sparrow.UnitFormat;
+import com.sparrowwallet.sparrow.control.WalletLabelDialog;
 import com.sparrowwallet.sparrow.event.*;
+import com.sparrowwallet.sparrow.glyphfont.FontAwesome5;
 import com.sparrowwallet.sparrow.io.Config;
 import com.sparrowwallet.sparrow.io.Storage;
 import com.sparrowwallet.sparrow.wallet.*;
@@ -24,12 +26,14 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyCode;
@@ -62,6 +66,8 @@ public class AshigaruWalletController implements Initializable {
     @FXML private TableView<UtxoRow> utxoTable;
     @FXML private TableColumn<UtxoRow, String> colDate;
     @FXML private TableColumn<UtxoRow, String> colOutput;
+    @FXML private TableColumn<UtxoRow, String> colAddress;
+    @FXML private TableColumn<UtxoRow, String> colLabel;
     @FXML private TableColumn<UtxoRow, String> colMixes;
     @FXML private TableColumn<UtxoRow, String> colValue;
     @FXML private TableView<TxnRow> txnTable;
@@ -72,6 +78,7 @@ public class AshigaruWalletController implements Initializable {
     @FXML private HBox mixButtonBox;
     @FXML private Button startMixBtn;
     @FXML private Button mixToBtn;
+    @FXML private Button labelSelectedBtn;
     @FXML private Button mixSelectedBtn;
     @FXML private VBox accountPanel;
 
@@ -89,29 +96,39 @@ public class AshigaruWalletController implements Initializable {
 
         colDate.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().date()));
         colOutput.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().output()));
-        colOutput.setCellFactory(col -> new TableCell<UtxoRow, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null || getIndex() >= getTableView().getItems().size()) {
-                    setGraphic(null); setText(null); return;
-                }
-                UtxoRow row = getTableView().getItems().get(getIndex());
-                String fullRef = row.utxoEntry().getHashIndex().getHash().toString()
-                        + ":" + row.utxoEntry().getHashIndex().getIndex();
-                Label lbl = new Label(item);
-                lbl.setMaxWidth(Double.MAX_VALUE);
-                HBox.setHgrow(lbl, javafx.scene.layout.Priority.ALWAYS);
-                HBox hbox = new HBox(4, lbl, makeCopyButton(fullRef, this));
-                hbox.setAlignment(Pos.CENTER_LEFT);
-                setGraphic(hbox); setText(null);
-            }
-        });
+        colAddress.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().address()));
+        colLabel.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().label()));
         colMixes.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().mixes()));
         colValue.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().value()));
 
-        utxoTable.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) ->
-                updateMixSelectedButton());
+        colAddress.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null || item.isEmpty()) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    HBox box = new HBox(4, new Label(item), makeCopyButton(item, this));
+                    box.setAlignment(Pos.CENTER_LEFT);
+                    setText(null);
+                    setGraphic(box);
+                }
+            }
+        });
+
+        colLabel.setCellFactory(TextFieldTableCell.forTableColumn());
+        colLabel.setOnEditCommit(event -> {
+            UtxoRow row = event.getRowValue();
+            row.utxoEntry().labelProperty().set(event.getNewValue());
+            utxoTable.refresh();
+        });
+        utxoTable.setEditable(true);
+
+        utxoTable.getSelectionModel().getSelectedItems().addListener(
+                (ListChangeListener<UtxoRow>) c -> updateActionButtons());
+        txnTable.getSelectionModel().getSelectedItems().addListener(
+                (ListChangeListener<TxnRow>) c -> updateActionButtons());
 
         // Transaction table
         txnTable.setItems(txnRows);
@@ -329,13 +346,15 @@ public class AshigaruWalletController implements Initializable {
             if (!(entry instanceof UtxoEntry utxoEntry)) continue;
             BlockTransactionHashIndex hashIndex = utxoEntry.getHashIndex();
 
-            String date = hashIndex.getDate() != null ? df.format(hashIndex.getDate()) : "Unconfirmed";
-            String output = abbreviate(hashIndex.getHash().toString()) + ":" + hashIndex.getIndex();
-            String mixes = isMixWallet && utxoEntry.getMixStatus() != null
+            String date    = hashIndex.getDate() != null ? df.format(hashIndex.getDate()) : "Unconfirmed";
+            String output  = abbreviate(hashIndex.getHash().toString()) + ":" + hashIndex.getIndex();
+            String address = utxoEntry.getAddress() != null ? utxoEntry.getAddress().toString() : "";
+            String label   = utxoEntry.getLabel() != null ? utxoEntry.getLabel() : "";
+            String mixes   = isMixWallet && utxoEntry.getMixStatus() != null
                     ? String.valueOf(utxoEntry.getMixStatus().getMixesDone()) : "-";
-            String value = fmt.formatBtcValue(hashIndex.getValue()) + " BTC";
+            String value   = fmt.formatBtcValue(hashIndex.getValue()) + " BTC";
 
-            utxoRows.add(new UtxoRow(date, output, mixes, value, utxoEntry));
+            utxoRows.add(new UtxoRow(date, output, address, mixes, label, value, utxoEntry));
         }
     }
 
@@ -397,6 +416,7 @@ public class AshigaruWalletController implements Initializable {
             mixSelectedBtn.setText("Mix Selected UTXOs");
             mixSelectedBtn.setDisable(true);
         }
+        updateActionButtons();
     }
 
     private boolean isMixing(Wallet wallet) {
@@ -425,6 +445,38 @@ public class AshigaruWalletController implements Initializable {
         mixSelectedBtn.setDisable(utxoTable.getSelectionModel().getSelectedItems().isEmpty());
     }
 
+    private void updateActionButtons() {
+        boolean utxosVisible = utxoTable.isVisible();
+        boolean utxoSelected = !utxoTable.getSelectionModel().getSelectedItems().isEmpty();
+        boolean txnSelected  = !txnTable.getSelectionModel().getSelectedItems().isEmpty();
+        boolean anySelected  = utxosVisible ? utxoSelected : txnSelected;
+
+        labelSelectedBtn.setVisible(anySelected);
+        labelSelectedBtn.setManaged(anySelected);
+
+        if (!utxosVisible) {
+            mixSelectedBtn.setVisible(false);
+        } else {
+            updateMixSelectedButton();
+        }
+    }
+
+    @FXML
+    private void onLabelSelected() {
+        WalletLabelDialog dialog = new WalletLabelDialog();
+        dialog.showAndWait().ifPresent(newLabel -> {
+            if (utxoTable.isVisible()) {
+                utxoTable.getSelectionModel().getSelectedItems().forEach(row ->
+                        row.utxoEntry().labelProperty().set(newLabel));
+                utxoTable.refresh();
+            } else {
+                txnTable.getSelectionModel().getSelectedItems().forEach(row ->
+                        row.txnEntry().labelProperty().set(newLabel));
+                txnTable.refresh();
+            }
+        });
+    }
+
     // -------------------------------------------------------------------------
     // Button actions
     // -------------------------------------------------------------------------
@@ -449,6 +501,7 @@ public class AshigaruWalletController implements Initializable {
         if (!showUtxos) {
             refreshTransactionTable();
         }
+        updateActionButtons();
     }
 
     @FXML
@@ -675,6 +728,6 @@ public class AshigaruWalletController implements Initializable {
     // Inner types
     // -------------------------------------------------------------------------
 
-    record UtxoRow(String date, String output, String mixes, String value, UtxoEntry utxoEntry) {}
+    record UtxoRow(String date, String output, String address, String mixes, String label, String value, UtxoEntry utxoEntry) {}
     record TxnRow(String date, String txid, String label, String amount, TransactionEntry txnEntry) {}
 }
