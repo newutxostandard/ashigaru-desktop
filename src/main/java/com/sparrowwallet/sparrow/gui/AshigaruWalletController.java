@@ -7,6 +7,7 @@ import com.samourai.whirlpool.client.whirlpool.beans.Pool;
 import com.sparrowwallet.drongo.protocol.Sha256Hash;
 import com.sparrowwallet.drongo.wallet.*;
 import com.sparrowwallet.sparrow.AppServices;
+import com.sparrowwallet.sparrow.Theme;
 import com.sparrowwallet.sparrow.EventManager;
 import com.sparrowwallet.sparrow.UnitFormat;
 import com.sparrowwallet.sparrow.event.*;
@@ -103,7 +104,7 @@ public class AshigaruWalletController implements Initializable {
                 } else {
                     Button copyBtn = new Button();
                     Glyph icon = new Glyph(FontAwesome5.FONT_NAME, FontAwesome5.Glyph.COPY);
-                    icon.setFontSize(12);
+                    icon.setStyle("-fx-font-family: '" + FontAwesome5.FONT_NAME + "'; -fx-font-size: 12px; -fx-text-fill: #1e88cf;");
                     copyBtn.setGraphic(icon);
                     copyBtn.getStyleClass().add("icon-button");
                     copyBtn.setTooltip(new Tooltip("Copy address"));
@@ -440,8 +441,11 @@ public class AshigaruWalletController implements Initializable {
         dialog.setTitle("Label");
         dialog.setHeaderText("Enter a label:");
         DialogPane pane = dialog.getDialogPane();
-        pane.getStylesheets().add(
-                AppServices.class.getResource("general.css").toExternalForm());
+        pane.getStylesheets().add(AppServices.class.getResource("general.css").toExternalForm());
+        pane.getStylesheets().add(AppServices.class.getResource("dialog.css").toExternalForm());
+        if (Config.get().getTheme() == Theme.DARK) {
+            pane.getStylesheets().add(AppServices.class.getResource("darktheme.css").toExternalForm());
+        }
         pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         TextField field = new TextField();
         field.setPromptText("Label");
