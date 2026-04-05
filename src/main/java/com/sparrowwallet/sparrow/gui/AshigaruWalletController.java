@@ -90,25 +90,10 @@ public class AshigaruWalletController implements Initializable {
         colDate.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().date()));
         colOutput.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().output()));
         colAddress.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().address()));
-        colLabel.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().label()));
         colMixes.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().mixes()));
         colValue.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().value()));
 
         colAddress.setCellFactory(col -> new TableCell<>() {
-            private final Button copyBtn = new Button();
-            {
-                Glyph icon = new Glyph(FontAwesome5.FONT_NAME, FontAwesome5.Glyph.COPY);
-                icon.setFontSize(11);
-                copyBtn.setGraphic(icon);
-                copyBtn.getStyleClass().add("icon-button");
-                copyBtn.setTooltip(new Tooltip("Copy address"));
-                copyBtn.setOnAction(e -> {
-                    ClipboardContent cc = new ClipboardContent();
-                    cc.putString(getItem());
-                    Clipboard.getSystemClipboard().setContent(cc);
-                });
-            }
-
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -116,7 +101,18 @@ public class AshigaruWalletController implements Initializable {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    HBox box = new HBox(4, new Label(item), copyBtn);
+                    Button copyBtn = new Button();
+                    Glyph icon = new Glyph(FontAwesome5.FONT_NAME, FontAwesome5.Glyph.COPY);
+                    icon.setFontSize(12);
+                    copyBtn.setGraphic(icon);
+                    copyBtn.getStyleClass().add("icon-button");
+                    copyBtn.setTooltip(new Tooltip("Copy address"));
+                    copyBtn.setOnAction(e -> {
+                        ClipboardContent cc = new ClipboardContent();
+                        cc.putString(item);
+                        Clipboard.getSystemClipboard().setContent(cc);
+                    });
+                    HBox box = new HBox(6, new Label(item), copyBtn);
                     box.setAlignment(Pos.CENTER_LEFT);
                     setText(null);
                     setGraphic(box);
@@ -124,12 +120,11 @@ public class AshigaruWalletController implements Initializable {
             }
         });
 
+        colLabel.setCellValueFactory(d -> d.getValue().utxoEntry().labelProperty());
         colLabel.setCellFactory(TextFieldTableCell.forTableColumn());
-        colLabel.setOnEditCommit(event -> {
-            UtxoRow row = event.getRowValue();
-            row.utxoEntry().labelProperty().set(event.getNewValue());
-            utxoTable.refresh();
-        });
+        colLabel.setEditable(true);
+        colLabel.setOnEditCommit(event ->
+                event.getRowValue().utxoEntry().labelProperty().set(event.getNewValue()));
         utxoTable.setEditable(true);
 
         utxoTable.getSelectionModel().getSelectedItems().addListener(
@@ -141,7 +136,12 @@ public class AshigaruWalletController implements Initializable {
         txnTable.setItems(txnRows);
         colTxnDate.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().date()));
         colTxnId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().txid()));
-        colTxnLabel.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().label()));
+        colTxnLabel.setCellValueFactory(d -> d.getValue().txnEntry().labelProperty());
+        colTxnLabel.setCellFactory(TextFieldTableCell.forTableColumn());
+        colTxnLabel.setEditable(true);
+        colTxnLabel.setOnEditCommit(event ->
+                event.getRowValue().txnEntry().labelProperty().set(event.getNewValue()));
+        txnTable.setEditable(true);
         colTxnAmount.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().amount()));
 
         // View toggle group
@@ -416,29 +416,40 @@ public class AshigaruWalletController implements Initializable {
 
         if (!utxosVisible) {
             mixSelectedBtn.setVisible(false);
-        } else {
+        } else if (mixSelectedBtn.isManaged()) {
+            mixSelectedBtn.setVisible(true);
             updateMixSelectedButton();
         }
     }
 
     @FXML
     private void onLabelSelected() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Label Selection");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Label:");
-        AppServices.moveToActiveWindowScreen(dialog);
-        dialog.showAndWait().ifPresent(newLabel -> {
+        showLabelDialog().ifPresent(newLabel -> {
             if (utxoTable.isVisible()) {
                 utxoTable.getSelectionModel().getSelectedItems().forEach(row ->
                         row.utxoEntry().labelProperty().set(newLabel));
-                utxoTable.refresh();
             } else {
                 txnTable.getSelectionModel().getSelectedItems().forEach(row ->
                         row.txnEntry().labelProperty().set(newLabel));
-                txnTable.refresh();
             }
         });
+    }
+
+    private java.util.Optional<String> showLabelDialog() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Label");
+        dialog.setHeaderText("Enter a label:");
+        DialogPane pane = dialog.getDialogPane();
+        pane.getStylesheets().add(
+                AppServices.class.getResource("general.css").toExternalForm());
+        pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        TextField field = new TextField();
+        field.setPromptText("Label");
+        pane.setContent(field);
+        Platform.runLater(field::requestFocus);
+        dialog.setResultConverter(bt -> bt == ButtonType.OK ? field.getText() : null);
+        AppServices.moveToActiveWindowScreen(dialog);
+        return dialog.showAndWait();
     }
 
     // -------------------------------------------------------------------------
