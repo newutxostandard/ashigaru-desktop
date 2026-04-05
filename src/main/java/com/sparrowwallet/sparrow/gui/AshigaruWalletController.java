@@ -7,6 +7,7 @@ import com.samourai.whirlpool.client.whirlpool.beans.Pool;
 import com.sparrowwallet.drongo.protocol.Sha256Hash;
 import com.sparrowwallet.drongo.wallet.*;
 import com.sparrowwallet.sparrow.AppServices;
+import com.sparrowwallet.sparrow.Theme;
 import com.sparrowwallet.sparrow.EventManager;
 import com.sparrowwallet.sparrow.UnitFormat;
 import com.sparrowwallet.sparrow.event.*;
@@ -14,7 +15,6 @@ import com.sparrowwallet.sparrow.glyphfont.FontAwesome5;
 import com.sparrowwallet.sparrow.io.Config;
 import com.sparrowwallet.sparrow.io.Storage;
 import com.sparrowwallet.sparrow.wallet.*;
-import com.sparrowwallet.sparrow.glyphfont.FontAwesome5;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import com.sparrowwallet.sparrow.whirlpool.Whirlpool;
@@ -477,8 +477,11 @@ public class AshigaruWalletController implements Initializable {
         dialog.setTitle("Label");
         dialog.setHeaderText("Enter a label:");
         DialogPane pane = dialog.getDialogPane();
-        pane.getStylesheets().add(
-                AppServices.class.getResource("general.css").toExternalForm());
+        pane.getStylesheets().add(AppServices.class.getResource("general.css").toExternalForm());
+        pane.getStylesheets().add(AppServices.class.getResource("dialog.css").toExternalForm());
+        if (Config.get().getTheme() == Theme.DARK) {
+            pane.getStylesheets().add(AppServices.class.getResource("darktheme.css").toExternalForm());
+        }
         pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         TextField field = new TextField();
         field.setPromptText("Label");
