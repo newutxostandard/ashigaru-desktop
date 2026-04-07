@@ -19,7 +19,7 @@
         <HBox styleClass="header-bar" alignment="CENTER_LEFT" spacing="12">
             <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
 
-            <Label text="Ashigaru Terminal" styleClass="app-title"/>
+            <Label text="Ashigaru" styleClass="app-title"/>
             <Region HBox.hgrow="ALWAYS"/>
 
             <!-- Wallet selector (visible when wallets are open) -->
@@ -79,7 +79,7 @@
                 <!-- Welcome placeholder shown before any wallet is opened -->
                 <StackPane fx:id="welcomePane" styleClass="welcome-pane">
                     <VBox alignment="CENTER" spacing="16">
-                        <Label text="Ashigaru Terminal" styleClass="welcome-title"/>
+                        <Label text="Ashigaru" styleClass="welcome-title"/>
                         <Label text="Open a wallet to get started." styleClass="welcome-sub"/>
                         <Label text="Use &#8220;Open Wallet...&#8221; or &#8220;Create / Restore...&#8221; in the sidebar." styleClass="welcome-hint"/>
                     </VBox>
