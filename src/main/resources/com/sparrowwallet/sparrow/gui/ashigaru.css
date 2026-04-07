@@ -388,8 +388,31 @@
     -fx-border-radius: 3;
     -fx-background-radius: 3;
 }
-.copy-icon-btn .glyph-font { -fx-fill: -ag-text-dim; }
-.copy-icon-btn:hover .glyph-font { -fx-fill: -ag-accent; }
+.copy-icon-btn .image-view { -fx-opacity: 0.65; }
+.copy-icon-btn:hover .image-view { -fx-opacity: 1.0; }
+
+/* ── Splash screen ────────────────────────────────────────────────────────── */
+.splash-pane {
+    -fx-background-color: -ag-bg;
+}
+.splash-title {
+    -fx-text-fill: -ag-accent;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+.splash-status {
+    -fx-text-fill: -ag-text-dim;
+    -fx-font-size: 13px;
+}
+.splash-progress .track {
+    -fx-background-color: -ag-bg-raised;
+    -fx-background-radius: 3;
+}
+.splash-progress .bar {
+    -fx-background-color: -ag-accent;
+    -fx-background-radius: 3;
+    -fx-background-insets: 0;
+}
 
 /* ── Receive dialog ───────────────────────────────────────────────────────── */
 .address-field {
