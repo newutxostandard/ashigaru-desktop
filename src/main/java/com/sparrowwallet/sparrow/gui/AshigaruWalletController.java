@@ -53,7 +53,9 @@ public class AshigaruWalletController implements Initializable {
     private static final Logger log = LoggerFactory.getLogger(AshigaruWalletController.class);
 
     @FXML private Label walletNameLabel;
+    @FXML private Label accountNameLabel;
     @FXML private Button receiveBtn;
+    @FXML private Button receiveCta;
     @FXML private TabPane accountTabs;
     @FXML private Label balanceLabel;
     @FXML private Label mempoolLabel;
@@ -227,6 +229,7 @@ public class AshigaruWalletController implements Initializable {
     // -------------------------------------------------------------------------
 
     private void buildAccountTabs(WalletForm masterForm) {
+        if (accountTabs == null) return; // account switching is handled by the main sidebar
         // Remember which tab was active
         Tab previouslySelected = accountTabs.getSelectionModel().getSelectedItem();
         String previousTabText = previouslySelected != null ? previouslySelected.getText() : null;
@@ -311,6 +314,17 @@ public class AshigaruWalletController implements Initializable {
         if (txnTable.isVisible()) {
             refreshTransactionTable();
         }
+
+        // Account name label
+        StandardAccount acctType = wallet.getStandardAccountType();
+        String acctName = (acctType == null || wallet.isMasterWallet()) ? "Deposit"
+                : switch (acctType) {
+                    case WHIRLPOOL_PREMIX  -> "Premix";
+                    case WHIRLPOOL_POSTMIX -> "Postmix";
+                    case WHIRLPOOL_BADBANK -> "Badbank";
+                    default -> wallet.getFullDisplayName();
+                };
+        accountNameLabel.setText(acctName);
 
         // Receive button — only for Deposit (master wallet)
         boolean isDeposit = wallet.isMasterWallet() || wallet.getStandardAccountType() == null
@@ -497,6 +511,11 @@ public class AshigaruWalletController implements Initializable {
     // -------------------------------------------------------------------------
 
     @FXML
+    private void onReceiveCta() {
+        onReceive();
+    }
+
+    @FXML
     private void onReceive() {
         if (activeAccountForm == null) return;
         try {
@@ -618,11 +637,13 @@ public class AshigaruWalletController implements Initializable {
             Platform.runLater(() -> {
                 AppServices.showSuccessDialog("Broadcast Successful",
                         "Transaction Zero ID:\n" + txid.toString());
-                // Auto-switch to Premix tab so user can see equalized UTXOs
-                accountTabs.getTabs().stream()
-                        .filter(t -> "Premix".equals(t.getText()))
-                        .findFirst()
-                        .ifPresent(t -> accountTabs.getSelectionModel().select(t));
+                // Auto-switch to Premix tab so user can see equalized UTXOs (if tab view is active)
+                if (accountTabs != null) {
+                    accountTabs.getTabs().stream()
+                            .filter(t -> "Premix".equals(t.getText()))
+                            .findFirst()
+                            .ifPresent(t -> accountTabs.getSelectionModel().select(t));
+                }
             });
         });
         svc.setOnFailed(e -> {
