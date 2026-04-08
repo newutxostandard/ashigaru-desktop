@@ -703,7 +703,7 @@ public class AshigaruWalletController implements Initializable {
     private static Button makeCopyButton(String textToCopy, Node owner) {
         Glyph icon = new Glyph(FontAwesome5.FONT_NAME, FontAwesome5.Glyph.COPY);
         icon.setFontSize(11);
-        icon.setStyle("-fx-fill: -ag-text-dim;");
+        icon.setStyle("-fx-fill: #A0A0A0;");
         Button btn = new Button("", icon);
         btn.getStyleClass().add("copy-icon-btn");
         btn.setOnAction(e -> {
