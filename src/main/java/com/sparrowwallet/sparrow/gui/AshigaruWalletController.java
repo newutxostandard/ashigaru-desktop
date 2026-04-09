@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe;
 import com.samourai.whirlpool.client.wallet.beans.MixProgress;
 import com.samourai.whirlpool.client.wallet.beans.Tx0FeeTarget;
 import com.samourai.whirlpool.client.whirlpool.beans.Pool;
+import com.sparrowwallet.drongo.address.Address;
 import com.sparrowwallet.drongo.protocol.Sha256Hash;
 import com.sparrowwallet.drongo.wallet.*;
 import com.sparrowwallet.sparrow.AppServices;
@@ -357,7 +358,13 @@ public class AshigaruWalletController implements Initializable {
 
             String date    = hashIndex.getDate() != null ? df.format(hashIndex.getDate()) : "Unconfirmed";
             String output  = abbreviate(hashIndex.getHash().toString()) + ":" + hashIndex.getIndex();
-            String address = utxoEntry.getAddress() != null ? utxoEntry.getAddress().toString() : "";
+            String address;
+            try {
+                Address addr = utxoEntry.getAddress();
+                address = addr != null ? addr.toString() : "";
+            } catch(Exception e) {
+                address = "";
+            }
             String label   = utxoEntry.getLabel() != null ? utxoEntry.getLabel() : "";
             String mixes   = isMixWallet && utxoEntry.getMixStatus() != null
                     ? String.valueOf(utxoEntry.getMixStatus().getMixesDone()) : "-";
