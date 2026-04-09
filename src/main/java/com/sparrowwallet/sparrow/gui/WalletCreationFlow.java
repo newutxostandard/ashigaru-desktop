@@ -25,10 +25,13 @@ import com.sparrowwallet.sparrow.wallet.WalletForm;
 import com.sparrowwallet.sparrow.whirlpool.WhirlpoolServices;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -289,48 +292,49 @@ public class WalletCreationFlow {
         if (wallets.isEmpty()) return;
 
         if (AppServices.onlineProperty().get()) {
-            // Non-blocking progress dialog with a Skip button so the user is never stuck
-            Alert progress = new Alert(Alert.AlertType.INFORMATION);
-            progress.setTitle(walletName);
-            progress.setHeaderText("Discovering accounts…");
-            ButtonType skipType = new ButtonType("Skip", ButtonBar.ButtonData.CANCEL_CLOSE);
-            progress.getButtonTypes().setAll(skipType);
-            progress.initOwner(owner);
-
             ElectrumServer.WalletDiscoveryService svc = new ElectrumServer.WalletDiscoveryService(wallets);
 
-            // If user skips, cancel the discovery service
-            progress.setOnHiding(ev -> svc.cancel());
+            Dialog<Void> progress = new Dialog<>();
+            progress.setTitle(walletName);
+            progress.setHeaderText("Discovering accounts…");
+            progress.initOwner(owner);
+            progress.initModality(Modality.APPLICATION_MODAL);
+            // No button types — dialog closes programmatically only
+
+            Label descLabel = new Label("Looking for previous transactions on the blockchain.");
+            descLabel.setWrapText(true);
+
+            Label statusLabel = new Label();
+            statusLabel.textProperty().bind(svc.messageProperty());
+            statusLabel.setOpacity(0.65);
+
+            ProgressBar bar = new ProgressBar();
+            bar.setPrefWidth(320);
+            bar.progressProperty().bind(svc.progressProperty());
+
+            VBox content = new VBox(10, descLabel, bar, statusLabel);
+            progress.getDialogPane().setContent(content);
 
             // Helper to close dialog and continue — always called exactly once
             Runnable finish = () -> {
-                progress.setOnHiding(null); // prevent double-cancel
+                progress.setOnHiding(null);
                 progress.close();
             };
 
-            svc.setOnSucceeded(e -> {
-                finish.run();
-                Optional<Wallet> found = svc.getValue();
-                Wallet wallet = found.orElseGet(() -> wallets.get(0));
+            Consumer<Wallet> proceed = wallet -> {
                 try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
                 saveWallet(walletName, wallet);
-            });
-            svc.setOnFailed(e -> {
-                finish.run();
-                log.error("Account discovery failed", e.getSource().getException());
-                Wallet wallet = wallets.get(0);
-                try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
-                saveWallet(walletName, wallet);
-            });
-            svc.setOnCancelled(e -> {
-                // Dialog already closed by user; just continue with default wallet
-                Wallet wallet = wallets.get(0);
-                try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
-                saveWallet(walletName, wallet);
-            });
+            };
+
+            svc.setOnSucceeded(e -> { finish.run(); proceed.accept(svc.getValue().orElseGet(() -> wallets.get(0))); });
+            svc.setOnFailed(e -> { finish.run(); log.error("Account discovery failed", e.getSource().getException()); proceed.accept(wallets.get(0)); });
+            svc.setOnCancelled(e -> { finish.run(); proceed.accept(wallets.get(0)); });
 
             svc.start();
             progress.show(); // non-blocking — callbacks close it when done
+
+            // Prevent the window X-button from closing the dialog while discovery runs
+            ((Stage) progress.getDialogPane().getScene().getWindow()).setOnCloseRequest(Event::consume);
         } else {
             Wallet wallet = wallets.get(0);
             try { addWhirlpoolAccounts(wallet); } catch (Exception ex) { log.error("Whirlpool setup failed", ex); }
