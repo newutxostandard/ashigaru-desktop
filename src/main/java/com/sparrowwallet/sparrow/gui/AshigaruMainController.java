@@ -370,6 +370,15 @@ public class AshigaruMainController implements Initializable {
     // -------------------------------------------------------------------------
 
     @Subscribe
+    public void childWalletsAdded(ChildWalletsAddedEvent event) {
+        if (!event.getChildWallets().isEmpty()) {
+            for (Wallet childWallet : event.getChildWallets()) {
+                AshigaruGui.addWallet(event.getStorage(), childWallet);
+            }
+        }
+    }
+
+    @Subscribe
     public void connectionEvent(ConnectionEvent event) {
         Platform.runLater(() -> {
             updateConnectionLabel(true);
