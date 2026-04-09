@@ -197,6 +197,9 @@ public class AshigaruGui extends Application {
                     WalletForm childForm = new WalletForm(storage, wallet);
                     EventManager.get().register(childForm);
                     masterForm.getNestedWalletForms().add(childForm);
+                    if (wallet.isValid()) {
+                        Platform.runLater(() -> childForm.refreshHistory(AppServices.getCurrentBlockHeight()));
+                    }
                 }
             }
         } else {
