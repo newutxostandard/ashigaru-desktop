@@ -145,7 +145,12 @@ public class TcpTransport implements CloseableTransport, TimeoutCounter {
 
             while(reading) {
                 try {
-                    readingCondition.await();
+                    long timeoutMs = readTimeouts[readTimeoutIndex] * 1000L + requestIdCount * PER_REQUEST_READ_TIMEOUT_MILLIS;
+                    if(!readingCondition.await(timeoutMs, TimeUnit.MILLISECONDS)) {
+                        readTimeoutIndex = Math.min(readTimeoutIndex + 1, readTimeouts.length - 1);
+                        log.warn("No response from server, setting read timeout to " + readTimeouts[readTimeoutIndex] + " secs");
+                        throw new IOException("No response from server");
+                    }
                 } catch(InterruptedException e) {
                     //Restore interrupt status and break
                     Thread.currentThread().interrupt();

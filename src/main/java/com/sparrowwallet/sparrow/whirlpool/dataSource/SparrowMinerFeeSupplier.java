@@ -39,14 +39,17 @@ public class SparrowMinerFeeSupplier implements MinerFeeSupplier {
 
     private static Integer getMinimumFeeForTarget(int targetBlocks) {
         List<Map.Entry<Integer, Double>> feeRates = new ArrayList<>(AppServices.getTargetBlockFeeRates().entrySet());
+        if(feeRates.isEmpty()) {
+            return FALLBACK_FEE_RATE;
+        }
         Collections.reverse(feeRates);
         for(Map.Entry<Integer, Double> feeRate : feeRates) {
             if(feeRate.getKey() <= targetBlocks) {
-                return feeRate.getValue().intValue();
+                return Math.max(1, feeRate.getValue().intValue());
             }
         }
 
-        return feeRates.get(0).getValue().intValue();
+        return Math.max(1, feeRates.get(0).getValue().intValue());
     }
 
 }
