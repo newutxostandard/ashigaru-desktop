@@ -322,17 +322,18 @@ public class AshigaruMainController implements Initializable {
      * with a lock icon and are only decrypted when the user explicitly selects them.
      */
     public void addRecentWalletFile(File file) {
-        Storage storage = new Storage(file);
         try {
+            Storage storage = new Storage(file);
             if (!storage.isEncrypted()) {
                 Platform.runLater(() -> runLoadService(storage, null));
-            } else {
-                unloadedWalletFiles.add(file);
-                Platform.runLater(this::refreshWalletList);
+                return;
             }
         } catch (IOException e) {
-            log.error("Could not check if wallet is encrypted: " + file, e);
+            log.warn("Could not determine encryption status, treating as encrypted: " + file, e);
         }
+        // Either confirmed encrypted, or couldn't tell — show as locked in dropdown
+        unloadedWalletFiles.add(file);
+        Platform.runLater(this::refreshWalletList);
     }
 
     /**
@@ -341,7 +342,8 @@ public class AshigaruMainController implements Initializable {
      */
     private void unlockWallet(WalletListItem item) {
         Storage storage = new Storage(item.walletFile());
-        Dialog<String> pwDialog = buildPasswordDialog(storage.getWalletName(null));
+        String walletName = item.displayName().replaceFirst("^\uD83D\uDD12\\s*", "");
+        Dialog<String> pwDialog = buildPasswordDialog(walletName);
         Optional<String> result = pwDialog.showAndWait();
         if (result.isEmpty() || result.get() == null) {
             // Cancelled — reset to placeholder without triggering another prompt
@@ -504,8 +506,7 @@ public class AshigaruMainController implements Initializable {
         // Locked (unloaded) wallets — show with a lock prefix so the user knows they need unlocking
         for (File f : unloadedWalletFiles) {
             if (!loadedFiles.contains(f)) {
-                Storage s = new Storage(f);
-                String displayName = "\uD83D\uDD12 " + s.getWalletName(null);
+                String displayName = "\uD83D\uDD12 " + deriveWalletName(f);
                 walletItems.add(new WalletListItem(null, displayName, f));
             }
         }
@@ -540,6 +541,13 @@ public class AshigaruMainController implements Initializable {
         } else {
             walletSelector.getSelectionModel().select(PLACEHOLDER);
         }
+    }
+
+    private static String deriveWalletName(File file) {
+        String name = file.getName();
+        if (name.endsWith(".mv.db")) return name.substring(0, name.length() - 6);
+        if (name.endsWith(".json"))  return name.substring(0, name.length() - 5);
+        return name;
     }
 
     // -------------------------------------------------------------------------
