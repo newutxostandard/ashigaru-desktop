@@ -233,15 +233,20 @@ jlink {
 task packageZipDistribution(type: Zip, dependsOn: jpackageImage) {
     archiveFileName      = "Ashigaru-${ashigaruTerminalVersion}-${osName}.zip"
     destinationDirectory = file("${buildDir}/distributions")
-    from("${buildDir}/jpackage/Ashigaru")
-    into('Ashigaru')
+    if (os.macOsX) {
+        from("${buildDir}/jpackage/Ashigaru.app")
+        into('Ashigaru.app')
+    } else {
+        from("${buildDir}/jpackage/Ashigaru")
+        into('Ashigaru')
+    }
 }
 
-task packageTarDistribution(type: Tar, dependsOn: jpackageImage) {
+task packageTarDistribution(type: Tar, dependsOn: jlink) {
     archiveFileName      = "Ashigaru-${ashigaruTerminalVersion}-${releaseArch}.tar.gz"
     destinationDirectory = file("${buildDir}/distributions")
     compression          = Compression.GZIP
-    from("${buildDir}/jpackage/Ashigaru")
+    from("${buildDir}/image")
     into('Ashigaru')
 }
 
