@@ -196,6 +196,9 @@ application {
 }
 
 jlink {
+    mergedModule {
+        requires 'org.slf4j'
+    }
     addExtraDependencies('jackson-core', 'jackson-annotations', 'jackson-databind',
                          'protobuf-java', 'jcommander',
                          'javafx-base', 'javafx-graphics', 'javafx-controls',
