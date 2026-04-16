@@ -33,13 +33,23 @@ jobs:
       - name: Package tar distribution
         if: ${{ runner.os == 'Linux' }}
         run: ./gradlew packageTarDistribution
+      - name: Prepare macOS app bundle for upload
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          cd build/jpackage
+          ditto -c -k --sequesterRsrc --keepParent Ashigaru.app Ashigaru.app.zip
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Ashigaru Build - ${{ runner.os }}
           path: |
-            build/jpackage/*
-            !build/jpackage/Ashigaru/
+            build/jpackage/*.dmg
+            build/jpackage/*.pkg
+            build/jpackage/*.msi
+            build/jpackage/*.exe
+            build/jpackage/*.deb
+            build/jpackage/*.rpm
+            build/jpackage/*.app.zip
             build/distributions/*
       - name: Headless build with Gradle
         if: ${{ runner.os == 'Linux' }}
@@ -56,6 +66,7 @@ jobs:
         with:
           name: Ashigaru Build - ${{ runner.os }} Headless
           path: |
-            build/jpackage/*
-            !build/jpackage/Ashigaru/
+            build/jpackage/*.deb
+            build/jpackage/*.rpm
+            build/jpackage/ashigaru-server*
             build/distributions/*
